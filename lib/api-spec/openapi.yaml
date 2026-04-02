@@ -1,0 +1,2685 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Motorcycle ERP & POS API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User management
+  - name: warehouses
+    description: Warehouse management
+  - name: parts
+    description: Parts inventory
+  - name: motorcycles
+    description: Motorcycle inventory
+  - name: vendors
+    description: Vendor management
+  - name: purchase-orders
+    description: Purchase order management
+  - name: grn
+    description: Goods received notes
+  - name: work-orders
+    description: Work order management
+  - name: invoices
+    description: Invoice management
+  - name: returns
+    description: Returns management
+  - name: inspections
+    description: Pre-owned inspection reports
+  - name: audit
+    description: Audit log
+  - name: analytics
+    description: Analytics & dashboard
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ──────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── USERS ─────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      parameters:
+        - in: query
+          name: role
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── WAREHOUSES ────────────────────────────────────────────────────────────
+  /warehouses:
+    get:
+      operationId: listWarehouses
+      tags: [warehouses]
+      summary: List all warehouses
+      responses:
+        "200":
+          description: List of warehouses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Warehouse"
+    post:
+      operationId: createWarehouse
+      tags: [warehouses]
+      summary: Create a warehouse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWarehouseBody"
+      responses:
+        "201":
+          description: Warehouse created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Warehouse"
+
+  /warehouses/{id}:
+    get:
+      operationId: getWarehouse
+      tags: [warehouses]
+      summary: Get warehouse by ID with bin location tree
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Warehouse with full bin tree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarehouseWithTree"
+    put:
+      operationId: updateWarehouse
+      tags: [warehouses]
+      summary: Update warehouse
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWarehouseBody"
+      responses:
+        "200":
+          description: Updated warehouse
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Warehouse"
+    delete:
+      operationId: deleteWarehouse
+      tags: [warehouses]
+      summary: Delete warehouse
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /warehouses/{warehouseId}/bins:
+    get:
+      operationId: listBins
+      tags: [warehouses]
+      summary: List bins in a warehouse
+      parameters:
+        - in: path
+          name: warehouseId
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: zone
+          schema:
+            type: string
+        - in: query
+          name: aisle
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bin"
+    post:
+      operationId: createBin
+      tags: [warehouses]
+      summary: Create a bin location
+      parameters:
+        - in: path
+          name: warehouseId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBinBody"
+      responses:
+        "201":
+          description: Bin created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bin"
+
+  # ─── PARTS ─────────────────────────────────────────────────────────────────
+  /parts:
+    get:
+      operationId: listParts
+      tags: [parts]
+      summary: List parts inventory
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by SKU, name, or model compatibility
+        - in: query
+          name: warehouseId
+          schema:
+            type: integer
+        - in: query
+          name: condition
+          schema:
+            $ref: "#/components/schemas/PartCondition"
+        - in: query
+          name: lowStock
+          schema:
+            type: boolean
+          description: Filter parts with quantity <= reorder point
+      responses:
+        "200":
+          description: List of parts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Part"
+    post:
+      operationId: createPart
+      tags: [parts]
+      summary: Create a part
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePartBody"
+      responses:
+        "201":
+          description: Part created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Part"
+
+  /parts/{id}:
+    get:
+      operationId: getPart
+      tags: [parts]
+      summary: Get part by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Part
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Part"
+    put:
+      operationId: updatePart
+      tags: [parts]
+      summary: Update part
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePartBody"
+      responses:
+        "200":
+          description: Updated part
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Part"
+    delete:
+      operationId: deletePart
+      tags: [parts]
+      summary: Delete part
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── MOTORCYCLES ───────────────────────────────────────────────────────────
+  /motorcycles:
+    get:
+      operationId: listMotorcycles
+      tags: [motorcycles]
+      summary: List motorcycle inventory
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/MotorcycleStatus"
+        - in: query
+          name: warehouseId
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of motorcycles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Motorcycle"
+    post:
+      operationId: createMotorcycle
+      tags: [motorcycles]
+      summary: Create a motorcycle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMotorcycleBody"
+      responses:
+        "201":
+          description: Motorcycle created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Motorcycle"
+
+  /motorcycles/{id}:
+    get:
+      operationId: getMotorcycle
+      tags: [motorcycles]
+      summary: Get motorcycle by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Motorcycle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Motorcycle"
+    put:
+      operationId: updateMotorcycle
+      tags: [motorcycles]
+      summary: Update motorcycle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMotorcycleBody"
+      responses:
+        "200":
+          description: Updated motorcycle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Motorcycle"
+    delete:
+      operationId: deleteMotorcycle
+      tags: [motorcycles]
+      summary: Delete motorcycle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── VENDORS ───────────────────────────────────────────────────────────────
+  /vendors:
+    get:
+      operationId: listVendors
+      tags: [vendors]
+      summary: List vendors
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of vendors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vendor"
+    post:
+      operationId: createVendor
+      tags: [vendors]
+      summary: Create a vendor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVendorBody"
+      responses:
+        "201":
+          description: Vendor created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vendor"
+
+  /vendors/{id}:
+    get:
+      operationId: getVendor
+      tags: [vendors]
+      summary: Get vendor by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vendor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vendor"
+    put:
+      operationId: updateVendor
+      tags: [vendors]
+      summary: Update vendor
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVendorBody"
+      responses:
+        "200":
+          description: Updated vendor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vendor"
+    delete:
+      operationId: deleteVendor
+      tags: [vendors]
+      summary: Delete vendor
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── PURCHASE ORDERS ───────────────────────────────────────────────────────
+  /purchase-orders:
+    get:
+      operationId: listPurchaseOrders
+      tags: [purchase-orders]
+      summary: List purchase orders
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/POStatus"
+        - in: query
+          name: vendorId
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of purchase orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PurchaseOrder"
+    post:
+      operationId: createPurchaseOrder
+      tags: [purchase-orders]
+      summary: Create a purchase order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePurchaseOrderBody"
+      responses:
+        "201":
+          description: Purchase order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  /purchase-orders/{id}:
+    get:
+      operationId: getPurchaseOrder
+      tags: [purchase-orders]
+      summary: Get purchase order by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Purchase order with lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrderWithLines"
+    put:
+      operationId: updatePurchaseOrder
+      tags: [purchase-orders]
+      summary: Update purchase order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePurchaseOrderBody"
+      responses:
+        "200":
+          description: Updated purchase order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+    delete:
+      operationId: deletePurchaseOrder
+      tags: [purchase-orders]
+      summary: Delete purchase order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /purchase-orders/{id}/confirm:
+    post:
+      operationId: confirmPurchaseOrder
+      tags: [purchase-orders]
+      summary: Confirm purchase order (change status to Ordered)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Confirmed purchase order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  # ─── GRN ───────────────────────────────────────────────────────────────────
+  /grn:
+    get:
+      operationId: listGRNs
+      tags: [grn]
+      summary: List goods received notes
+      parameters:
+        - in: query
+          name: purchaseOrderId
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of GRNs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GRN"
+    post:
+      operationId: createGRN
+      tags: [grn]
+      summary: Create a GRN and update stock levels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGRNBody"
+      responses:
+        "201":
+          description: GRN created, stock updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GRN"
+
+  /grn/{id}:
+    get:
+      operationId: getGRN
+      tags: [grn]
+      summary: Get GRN by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: GRN with lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GRNWithLines"
+
+  # ─── WORK ORDERS ───────────────────────────────────────────────────────────
+  /work-orders:
+    get:
+      operationId: listWorkOrders
+      tags: [work-orders]
+      summary: List work orders
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/WorkOrderStatus"
+        - in: query
+          name: assignedTo
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of work orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkOrder"
+    post:
+      operationId: createWorkOrder
+      tags: [work-orders]
+      summary: Create a work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkOrderBody"
+      responses:
+        "201":
+          description: Work order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrder"
+
+  /work-orders/{id}:
+    get:
+      operationId: getWorkOrder
+      tags: [work-orders]
+      summary: Get work order by ID with lines
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Work order with lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrderWithLines"
+    put:
+      operationId: updateWorkOrder
+      tags: [work-orders]
+      summary: Update work order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkOrderBody"
+      responses:
+        "200":
+          description: Updated work order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrder"
+    delete:
+      operationId: deleteWorkOrder
+      tags: [work-orders]
+      summary: Delete work order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /work-orders/{id}/status:
+    put:
+      operationId: updateWorkOrderStatus
+      tags: [work-orders]
+      summary: Transition work order status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkOrderStatusBody"
+      responses:
+        "200":
+          description: Updated work order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrder"
+
+  /work-orders/{id}/lines:
+    post:
+      operationId: addWorkOrderLine
+      tags: [work-orders]
+      summary: Add a part line to a work order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkOrderLineBody"
+      responses:
+        "201":
+          description: Line added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkOrderLine"
+
+  /work-orders/{id}/lines/{lineId}:
+    delete:
+      operationId: deleteWorkOrderLine
+      tags: [work-orders]
+      summary: Remove a line from a work order
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: lineId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Line removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── INVOICES ──────────────────────────────────────────────────────────────
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List invoices
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/InvoiceStatus"
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create an invoice (POS checkout or from work order)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvoiceBody"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithLines"
+
+  /invoices/{id}:
+    get:
+      operationId: getInvoice
+      tags: [invoices]
+      summary: Get invoice by ID with lines
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Invoice with lines
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithLines"
+    delete:
+      operationId: deleteInvoice
+      tags: [invoices]
+      summary: Delete invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ─── RETURNS ───────────────────────────────────────────────────────────────
+  /returns:
+    get:
+      operationId: listReturns
+      tags: [returns]
+      summary: List returns
+      parameters:
+        - in: query
+          name: invoiceId
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of returns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Return"
+    post:
+      operationId: createReturn
+      tags: [returns]
+      summary: Create a return and restore stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReturnBody"
+      responses:
+        "201":
+          description: Return created, stock restored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Return"
+
+  # ─── INSPECTIONS ───────────────────────────────────────────────────────────
+  /inspections:
+    get:
+      operationId: listInspections
+      tags: [inspections]
+      summary: List pre-owned inspection reports
+      parameters:
+        - in: query
+          name: motorcycleId
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+    post:
+      operationId: createInspection
+      tags: [inspections]
+      summary: Create an inspection report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInspectionBody"
+      responses:
+        "201":
+          description: Inspection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+
+  /inspections/{id}:
+    get:
+      operationId: getInspection
+      tags: [inspections]
+      summary: Get inspection by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+    put:
+      operationId: updateInspection
+      tags: [inspections]
+      summary: Update inspection
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInspectionBody"
+      responses:
+        "200":
+          description: Updated inspection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+
+  # ─── AUDIT LOG ─────────────────────────────────────────────────────────────
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit log entries
+      parameters:
+        - in: query
+          name: entity
+          schema:
+            type: string
+        - in: query
+          name: action
+          schema:
+            $ref: "#/components/schemas/AuditAction"
+        - in: query
+          name: userId
+          schema:
+            type: integer
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogResponse"
+
+  # ─── ANALYTICS / DASHBOARD ─────────────────────────────────────────────────
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardSummary
+      tags: [analytics]
+      summary: Get dashboard summary (KPIs, P&L, alerts)
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /analytics/profit-loss:
+    get:
+      operationId: getProfitLoss
+      tags: [analytics]
+      summary: Get P&L breakdown by period
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: monthly
+        - in: query
+          name: months
+          schema:
+            type: integer
+            default: 6
+      responses:
+        "200":
+          description: P&L data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfitLossPeriod"
+
+  /analytics/stock-turnover:
+    get:
+      operationId: getStockTurnover
+      tags: [analytics]
+      summary: Get top stock turnover by part
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Stock turnover data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockTurnoverItem"
+
+  /analytics/reorder-suggestions:
+    get:
+      operationId: getReorderSuggestions
+      tags: [analytics]
+      summary: Get parts needing reorder
+      responses:
+        "200":
+          description: Reorder suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReorderSuggestion"
+
+  /analytics/stale-work-orders:
+    get:
+      operationId: getStaleWorkOrders
+      tags: [analytics]
+      summary: Get stale work orders (no update > 7 days)
+      responses:
+        "200":
+          description: Stale work orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WorkOrder"
+
+  /analytics/top-parts:
+    get:
+      operationId: getTopParts
+      tags: [analytics]
+      summary: Get top-selling parts
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top parts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopPartItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    # ─── ENUMS ───────────────────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum: [admin, storekeeper, technician, sales]
+
+    PartCondition:
+      type: string
+      enum: [new, used]
+
+    MotorcycleStatus:
+      type: string
+      enum: [available, sold, in_service, pre_owned]
+
+    POStatus:
+      type: string
+      enum: [draft, ordered, partially_received, received, cancelled]
+
+    WorkOrderStatus:
+      type: string
+      enum: [draft, parts_reserved, ready_for_invoice, invoiced, cancelled]
+
+    InvoiceStatus:
+      type: string
+      enum: [draft, paid, cancelled, returned]
+
+    AuditAction:
+      type: string
+      enum: [create, update, delete]
+
+    # ─── AUTH ─────────────────────────────────────────────────────────────────
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    # ─── USER ─────────────────────────────────────────────────────────────────
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        fullName:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        email:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - fullName
+        - role
+        - isActive
+        - createdAt
+
+    CreateUserBody:
+      type: object
+      properties:
+        username:
+          type: string
+        fullName:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - fullName
+        - role
+        - password
+
+    UpdateUserBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        email:
+          type: string
+        isActive:
+          type: boolean
+        password:
+          type: string
+
+    # ─── WAREHOUSE ───────────────────────────────────────────────────────────
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - isActive
+        - createdAt
+
+    CreateWarehouseBody:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+
+    Bin:
+      type: object
+      properties:
+        id:
+          type: integer
+        warehouseId:
+          type: integer
+        zone:
+          type: string
+        aisle:
+          type: string
+        shelf:
+          type: string
+        bin:
+          type: string
+        label:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - warehouseId
+        - zone
+        - aisle
+        - shelf
+        - bin
+        - label
+        - createdAt
+
+    CreateBinBody:
+      type: object
+      properties:
+        zone:
+          type: string
+        aisle:
+          type: string
+        shelf:
+          type: string
+        bin:
+          type: string
+      required:
+        - zone
+        - aisle
+        - shelf
+        - bin
+
+    WarehouseWithTree:
+      allOf:
+        - $ref: "#/components/schemas/Warehouse"
+        - type: object
+          properties:
+            bins:
+              type: array
+              items:
+                $ref: "#/components/schemas/Bin"
+
+    # ─── PART ────────────────────────────────────────────────────────────────
+    Part:
+      type: object
+      properties:
+        id:
+          type: integer
+        sku:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          $ref: "#/components/schemas/PartCondition"
+        modelCompatibility:
+          type: string
+        quantityOnHand:
+          type: integer
+        reorderPoint:
+          type: integer
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+        binId:
+          type: integer
+        binLabel:
+          type: string
+        warehouseName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sku
+        - name
+        - condition
+        - quantityOnHand
+        - reorderPoint
+        - costPrice
+        - sellingPrice
+        - createdAt
+
+    CreatePartBody:
+      type: object
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          $ref: "#/components/schemas/PartCondition"
+        modelCompatibility:
+          type: string
+        quantityOnHand:
+          type: integer
+        reorderPoint:
+          type: integer
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+        binId:
+          type: integer
+      required:
+        - sku
+        - name
+        - condition
+        - quantityOnHand
+        - reorderPoint
+        - costPrice
+        - sellingPrice
+
+    UpdatePartBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        condition:
+          $ref: "#/components/schemas/PartCondition"
+        modelCompatibility:
+          type: string
+        quantityOnHand:
+          type: integer
+        reorderPoint:
+          type: integer
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+        binId:
+          type: integer
+
+    # ─── MOTORCYCLE ──────────────────────────────────────────────────────────
+    Motorcycle:
+      type: object
+      properties:
+        id:
+          type: integer
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        vin:
+          type: string
+        color:
+          type: string
+        engineSize:
+          type: string
+        mileage:
+          type: integer
+        status:
+          $ref: "#/components/schemas/MotorcycleStatus"
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+        warehouseName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - make
+        - model
+        - year
+        - status
+        - costPrice
+        - sellingPrice
+        - createdAt
+
+    CreateMotorcycleBody:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        vin:
+          type: string
+        color:
+          type: string
+        engineSize:
+          type: string
+        mileage:
+          type: integer
+        status:
+          $ref: "#/components/schemas/MotorcycleStatus"
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+      required:
+        - make
+        - model
+        - year
+        - status
+        - costPrice
+        - sellingPrice
+
+    UpdateMotorcycleBody:
+      type: object
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        vin:
+          type: string
+        color:
+          type: string
+        engineSize:
+          type: string
+        mileage:
+          type: integer
+        status:
+          $ref: "#/components/schemas/MotorcycleStatus"
+        costPrice:
+          type: number
+        sellingPrice:
+          type: number
+        warehouseId:
+          type: integer
+
+    # ─── VENDOR ──────────────────────────────────────────────────────────────
+    Vendor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        contactPerson:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        taxNumber:
+          type: string
+        notes:
+          type: string
+        totalPurchased:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - createdAt
+
+    CreateVendorBody:
+      type: object
+      properties:
+        name:
+          type: string
+        contactPerson:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        taxNumber:
+          type: string
+        notes:
+          type: string
+      required:
+        - name
+
+    # ─── PURCHASE ORDER ──────────────────────────────────────────────────────
+    PurchaseOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        poNumber:
+          type: string
+        vendorId:
+          type: integer
+        vendorName:
+          type: string
+        status:
+          $ref: "#/components/schemas/POStatus"
+        totalAmount:
+          type: number
+        notes:
+          type: string
+        orderedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - poNumber
+        - vendorId
+        - status
+        - totalAmount
+        - createdAt
+
+    PurchaseOrderLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        purchaseOrderId:
+          type: integer
+        partId:
+          type: integer
+        partSku:
+          type: string
+        partName:
+          type: string
+        quantity:
+          type: integer
+        unitCost:
+          type: number
+        totalCost:
+          type: number
+      required:
+        - id
+        - purchaseOrderId
+        - partId
+        - quantity
+        - unitCost
+        - totalCost
+
+    PurchaseOrderWithLines:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseOrder"
+        - type: object
+          properties:
+            lines:
+              type: array
+              items:
+                $ref: "#/components/schemas/PurchaseOrderLine"
+
+    CreatePurchaseOrderBody:
+      type: object
+      properties:
+        vendorId:
+          type: integer
+        notes:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreatePOLineBody"
+      required:
+        - vendorId
+        - lines
+
+    CreatePOLineBody:
+      type: object
+      properties:
+        partId:
+          type: integer
+        quantity:
+          type: integer
+        unitCost:
+          type: number
+      required:
+        - partId
+        - quantity
+        - unitCost
+
+    UpdatePurchaseOrderBody:
+      type: object
+      properties:
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/POStatus"
+
+    # ─── GRN ─────────────────────────────────────────────────────────────────
+    GRN:
+      type: object
+      properties:
+        id:
+          type: integer
+        grnNumber:
+          type: string
+        purchaseOrderId:
+          type: integer
+        poNumber:
+          type: string
+        vendorId:
+          type: integer
+        vendorName:
+          type: string
+        receivedAt:
+          type: string
+          format: date-time
+        receivedBy:
+          type: integer
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - grnNumber
+        - purchaseOrderId
+        - receivedAt
+        - createdAt
+
+    GRNLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        grnId:
+          type: integer
+        partId:
+          type: integer
+        partSku:
+          type: string
+        partName:
+          type: string
+        quantityReceived:
+          type: integer
+        binId:
+          type: integer
+        binLabel:
+          type: string
+      required:
+        - id
+        - grnId
+        - partId
+        - quantityReceived
+
+    GRNWithLines:
+      allOf:
+        - $ref: "#/components/schemas/GRN"
+        - type: object
+          properties:
+            lines:
+              type: array
+              items:
+                $ref: "#/components/schemas/GRNLine"
+
+    CreateGRNBody:
+      type: object
+      properties:
+        purchaseOrderId:
+          type: integer
+        notes:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateGRNLineBody"
+      required:
+        - purchaseOrderId
+        - lines
+
+    CreateGRNLineBody:
+      type: object
+      properties:
+        partId:
+          type: integer
+        quantityReceived:
+          type: integer
+        binId:
+          type: integer
+      required:
+        - partId
+        - quantityReceived
+
+    # ─── WORK ORDER ──────────────────────────────────────────────────────────
+    WorkOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        woNumber:
+          type: string
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        motorcycleId:
+          type: integer
+        motorcycleDesc:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/WorkOrderStatus"
+        assignedTo:
+          type: integer
+        assignedToName:
+          type: string
+        laborCost:
+          type: number
+        totalPartsCost:
+          type: number
+        createdBy:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - woNumber
+        - customerName
+        - description
+        - status
+        - laborCost
+        - totalPartsCost
+        - createdAt
+        - updatedAt
+
+    WorkOrderLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        workOrderId:
+          type: integer
+        partId:
+          type: integer
+        partSku:
+          type: string
+        partName:
+          type: string
+        binId:
+          type: integer
+        binLabel:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+      required:
+        - id
+        - workOrderId
+        - partId
+        - quantity
+        - unitPrice
+        - totalPrice
+
+    WorkOrderWithLines:
+      allOf:
+        - $ref: "#/components/schemas/WorkOrder"
+        - type: object
+          properties:
+            lines:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkOrderLine"
+
+    CreateWorkOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        motorcycleId:
+          type: integer
+        description:
+          type: string
+        assignedTo:
+          type: integer
+        laborCost:
+          type: number
+      required:
+        - customerName
+        - description
+        - laborCost
+
+    UpdateWorkOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        motorcycleId:
+          type: integer
+        description:
+          type: string
+        assignedTo:
+          type: integer
+        laborCost:
+          type: number
+
+    UpdateWorkOrderStatusBody:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/WorkOrderStatus"
+      required:
+        - status
+
+    CreateWorkOrderLineBody:
+      type: object
+      properties:
+        partId:
+          type: integer
+        binId:
+          type: integer
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      required:
+        - partId
+        - quantity
+        - unitPrice
+
+    # ─── INVOICE ─────────────────────────────────────────────────────────────
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        invoiceNumber:
+          type: string
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        workOrderId:
+          type: integer
+        woNumber:
+          type: string
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        subtotal:
+          type: number
+        taxAmount:
+          type: number
+        totalAmount:
+          type: number
+        paymentMethod:
+          type: string
+        createdBy:
+          type: integer
+        qrCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - invoiceNumber
+        - customerName
+        - status
+        - subtotal
+        - taxAmount
+        - totalAmount
+        - createdAt
+
+    InvoiceLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        invoiceId:
+          type: integer
+        partId:
+          type: integer
+        partSku:
+          type: string
+        partName:
+          type: string
+        motorcycleId:
+          type: integer
+        description:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        totalPrice:
+          type: number
+      required:
+        - id
+        - invoiceId
+        - description
+        - quantity
+        - unitPrice
+        - totalPrice
+
+    InvoiceWithLines:
+      allOf:
+        - $ref: "#/components/schemas/Invoice"
+        - type: object
+          properties:
+            lines:
+              type: array
+              items:
+                $ref: "#/components/schemas/InvoiceLine"
+
+    CreateInvoiceBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        workOrderId:
+          type: integer
+        paymentMethod:
+          type: string
+        taxRate:
+          type: number
+          default: 0
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateInvoiceLineBody"
+      required:
+        - customerName
+        - lines
+
+    CreateInvoiceLineBody:
+      type: object
+      properties:
+        partId:
+          type: integer
+        motorcycleId:
+          type: integer
+        description:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      required:
+        - description
+        - quantity
+        - unitPrice
+
+    # ─── RETURN ──────────────────────────────────────────────────────────────
+    Return:
+      type: object
+      properties:
+        id:
+          type: integer
+        returnNumber:
+          type: string
+        invoiceId:
+          type: integer
+        invoiceNumber:
+          type: string
+        reason:
+          type: string
+        refundAmount:
+          type: number
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - returnNumber
+        - invoiceId
+        - reason
+        - refundAmount
+        - createdAt
+
+    CreateReturnBody:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+        reason:
+          type: string
+        refundAmount:
+          type: number
+        lineIds:
+          type: array
+          items:
+            type: integer
+      required:
+        - invoiceId
+        - reason
+        - refundAmount
+
+    # ─── INSPECTION ──────────────────────────────────────────────────────────
+    Inspection:
+      type: object
+      properties:
+        id:
+          type: integer
+        motorcycleId:
+          type: integer
+        motorcycleDesc:
+          type: string
+        inspectorId:
+          type: integer
+        inspectorName:
+          type: string
+        overallGrade:
+          type: string
+          enum: [excellent, good, fair, poor]
+        engineCondition:
+          type: string
+        bodyCondition:
+          type: string
+        electricalCondition:
+          type: string
+        tiresCondition:
+          type: string
+        brakeCondition:
+          type: string
+        notes:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        isCertified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - motorcycleId
+        - overallGrade
+        - isCertified
+        - createdAt
+
+    CreateInspectionBody:
+      type: object
+      properties:
+        motorcycleId:
+          type: integer
+        overallGrade:
+          type: string
+          enum: [excellent, good, fair, poor]
+        engineCondition:
+          type: string
+        bodyCondition:
+          type: string
+        electricalCondition:
+          type: string
+        tiresCondition:
+          type: string
+        brakeCondition:
+          type: string
+        notes:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        isCertified:
+          type: boolean
+      required:
+        - motorcycleId
+        - overallGrade
+
+    UpdateInspectionBody:
+      type: object
+      properties:
+        overallGrade:
+          type: string
+          enum: [excellent, good, fair, poor]
+        engineCondition:
+          type: string
+        bodyCondition:
+          type: string
+        electricalCondition:
+          type: string
+        tiresCondition:
+          type: string
+        brakeCondition:
+          type: string
+        notes:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        isCertified:
+          type: boolean
+
+    # ─── AUDIT LOG ───────────────────────────────────────────────────────────
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: string
+        action:
+          $ref: "#/components/schemas/AuditAction"
+        entity:
+          type: string
+        entityId:
+          type: integer
+        before:
+          type: object
+        after:
+          type: object
+        ipAddress:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - action
+        - entity
+        - createdAt
+
+    AuditLogResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - data
+        - total
+        - limit
+        - offset
+
+    # ─── ANALYTICS ───────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        totalCost:
+          type: number
+        grossProfit:
+          type: number
+        profitMargin:
+          type: number
+        invoicesThisMonth:
+          type: integer
+        openWorkOrders:
+          type: integer
+        staleWorkOrders:
+          type: integer
+        lowStockParts:
+          type: integer
+        motorcyclesInStock:
+          type: integer
+        pendingPurchaseOrders:
+          type: integer
+        recentInvoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+      required:
+        - totalRevenue
+        - totalCost
+        - grossProfit
+        - profitMargin
+        - invoicesThisMonth
+        - openWorkOrders
+        - staleWorkOrders
+        - lowStockParts
+        - motorcyclesInStock
+        - pendingPurchaseOrders
+        - recentInvoices
+
+    ProfitLossPeriod:
+      type: object
+      properties:
+        period:
+          type: string
+        revenue:
+          type: number
+        cost:
+          type: number
+        profit:
+          type: number
+      required:
+        - period
+        - revenue
+        - cost
+        - profit
+
+    StockTurnoverItem:
+      type: object
+      properties:
+        partId:
+          type: integer
+        sku:
+          type: string
+        name:
+          type: string
+        quantitySold:
+          type: integer
+        revenue:
+          type: number
+      required:
+        - partId
+        - sku
+        - name
+        - quantitySold
+        - revenue
+
+    ReorderSuggestion:
+      type: object
+      properties:
+        partId:
+          type: integer
+        sku:
+          type: string
+        name:
+          type: string
+        currentStock:
+          type: integer
+        reorderPoint:
+          type: integer
+        suggestedOrderQty:
+          type: integer
+        lastVendorName:
+          type: string
+        lastCostPrice:
+          type: number
+      required:
+        - partId
+        - sku
+        - name
+        - currentStock
+        - reorderPoint
+        - suggestedOrderQty
+
+    TopPartItem:
+      type: object
+      properties:
+        partId:
+          type: integer
+        sku:
+          type: string
+        name:
+          type: string
+        quantitySold:
+          type: integer
+        totalRevenue:
+          type: number
+        rank:
+          type: integer
+      required:
+        - partId
+        - sku
+        - name
+        - quantitySold
+        - totalRevenue
+        - rank
