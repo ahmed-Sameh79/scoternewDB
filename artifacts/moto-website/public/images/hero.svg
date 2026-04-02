@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a0a00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#bg)"/>
+  <!-- Stylized motorcycle silhouette -->
+  <g transform="translate(700,300)" fill="#333" opacity="0.6">
+    <!-- wheels -->
+    <circle cx="-180" cy="80" r="80" fill="none" stroke="#ff6600" stroke-width="12"/>
+    <circle cx="-180" cy="80" r="20" fill="#ff6600"/>
+    <circle cx="180" cy="80" r="80" fill="none" stroke="#ff6600" stroke-width="12"/>
+    <circle cx="180" cy="80" r="20" fill="#ff6600"/>
+    <!-- body -->
+    <ellipse cx="0" cy="-20" rx="200" ry="50" fill="#222"/>
+    <!-- seat -->
+    <ellipse cx="30" cy="-60" rx="80" ry="20" fill="#333"/>
+    <!-- handlebars -->
+    <line x1="-60" y1="-70" x2="-60" y2="-120" stroke="#ff6600" stroke-width="8"/>
+    <line x1="-80" y1="-120" x2="-40" y2="-120" stroke="#ff6600" stroke-width="8"/>
+    <!-- fork -->
+    <line x1="-80" y1="-60" x2="-180" y2="0" stroke="#444" stroke-width="10"/>
+    <line x1="-60" y1="-60" x2="-180" y2="0" stroke="#444" stroke-width="10"/>
+    <!-- exhaust -->
+    <path d="M100,-10 C150,20 200,40 220,80" stroke="#ff6600" stroke-width="6" fill="none"/>
+  </g>
+  <!-- Orange accent line -->
+  <rect x="0" y="580" width="1200" height="4" fill="#ff6600"/>
+</svg>

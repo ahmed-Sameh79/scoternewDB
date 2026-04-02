@@ -1,0 +1,75 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "showroom": "المعرض",
+    "about": "من نحن",
+    "contact": "اتصل بنا",
+    "signin": "تسجيل الدخول"
+  },
+  "home": {
+    "compatibility_checker": "التحقق من التوافق",
+    "select_brand": "اختر العلامة التجارية",
+    "check_parts": "تحقق من القطع",
+    "parts_available": "القطع متوفرة لهذه العلامة التجارية",
+    "no_parts": "لا توجد قطع متوفرة",
+    "featured_products": "المنتجات المميزة",
+    "view_all": "عرض الكل",
+    "download_app": "حمل تطبيقنا",
+    "app_desc": "احصل على إمكانية الوصول إلى الكتالوج الكامل وإدارة طلباتك أثناء التنقل."
+  },
+  "showroom": {
+    "title": "المعرض",
+    "search": "البحث عن المنتجات...",
+    "all_brands": "جميع العلامات التجارية",
+    "all_categories": "جميع الفئات",
+    "condition": "الحالة",
+    "new": "جديد",
+    "used": "مستعمل",
+    "out_of_stock": "نفذت الكمية",
+    "in_stock": "متوفر",
+    "available": "متاح",
+    "sold": "مباع",
+    "no_results": "لم يتم العثور على منتجات تطابق بحثك.",
+    "selling_price": "سعر البيع",
+    "specifications": "المواصفات",
+    "features": "المميزات الرئيسية",
+    "category": "الفئة",
+    "spec_engine_cc": "سعة المحرك",
+    "spec_top_speed": "أقصى سرعة",
+    "spec_fuel_capacity": "سعة خزان الوقود",
+    "spec_weight": "الوزن",
+    "spec_seat_height": "ارتفاع المقعد",
+    "spec_transmission": "ناقل الحركة",
+    "spec_fuel_type": "نوع الوقود",
+    "spec_engine_size": "حجم المحرك"
+  },
+  "about": {
+    "title": "من نحن"
+  },
+  "contact": {
+    "title": "اتصل بنا",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "subject": "الموضوع",
+    "message": "الرسالة",
+    "send": "إرسال الرسالة",
+    "success": "تم إرسال الرسالة بنجاح",
+    "error": "فشل في إرسال الرسالة",
+    "info": "معلومات الاتصال"
+  },
+  "signin": {
+    "title": "تسجيل دخول المشرف",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "submit": "تسجيل الدخول",
+    "error": "بيانات الاعتماد غير صالحة",
+    "success": "تم تسجيل الدخول بنجاح"
+  },
+  "footer": {
+    "address": "العنوان",
+    "contact": "اتصل بنا",
+    "follow_us": "تابعنا",
+    "rights": "جميع الحقوق محفوظة."
+  }
+}
