@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Upload, X, ImageIcon } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface ImageUploadProps {
   value: string | null | undefined;
@@ -15,23 +16,22 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const token = localStorage.getItem("token");
-
   async function handleFile(file: File) {
     setError(null);
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append("images", file);
-      const res = await fetch("/api/uploads/images", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
-      });
-      if (!res.ok) throw new Error("Upload failed");
-      const data = await res.json();
-      onChange(data.urls?.[0] ?? null);
-    } catch {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("images")
+        .upload(filename, file, { upsert: false });
+
+      if (uploadError) throw new Error(uploadError.message);
+
+      const { data } = supabase.storage.from("images").getPublicUrl(filename);
+      onChange(data.publicUrl);
+    } catch (e: any) {
       setError(t("uploadError", "Upload failed. Try again."));
     } finally {
       setUploading(false);
